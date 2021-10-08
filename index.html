@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ModBundler</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/script.js" type="module" defer></script>
+  </head>
+  <body>
+    <h1>
+      ModBundler
+    </h1>
+    <p>
+      An ES Module bundler
+    </p>
+    <form>
+      <label>
+        Import Map (optional)<br />
+        <textarea cols="40" rows="8" name="im">{}</textarea>
+      </label>
+      <br />
+      <br />
+      <label>
+        Exported Modules (required)<br />
+        <textarea cols="40" rows="8" name="mods">{
+  "canvasConfetti": "https://cdn.skypack.dev/canvas-confetti"
+}</textarea>
+      </label>
+      <br />
+      <br />
+      <button type="submit" id="btn">
+        Bundle
+      </button>
+      <br />
+      <br />
+      <textarea
+        cols="40"
+        rows="8"
+        placeholder="Bundler output goes here."
+        readonly
+        id="output"
+      ></textarea>
+    </form>
+    <footer>
+      <br />
+      <br />
+      <br />
+      <hr />
+      Project by <a href="https://easrng.us.to">easrng</a>
+    </footer>
+  </body>
+</html>
