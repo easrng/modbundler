@@ -8,6 +8,7 @@
     <script data-stats-config="beacon=https://collect.easrng.workers.dev&site=modbundler&loadEvent=1">
     !((e,a,s,r,n,g)=>{e.head.append(a=Object.assign(e.createElement('script'),{src:'https://easrng.github.io/stats/stats.js',async:!0}));a.onerror=o=>g.map(z=>z.e(o),g.push=x=>r.reject(o));s[n]=new Proxy({},{get:(o,f)=>f=='_q'?g:(...a)=>new r((c,e)=>g.push({f,a,c,e}))})})(document,0,window,Promise,"stats",[]);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha256-rMfkFFWoB2W1/Zx+4bgHim0WC7vKRVrq6FTeZclH1Z4=" crossorigin="anonymous"></script>
     <script src="script.js" type="module" defer></script>
   </head>
   <body>
@@ -17,23 +18,25 @@
     <p>
       An ES Module bundler
     </p>
-    <form>
+    <div>
       <label>
         Import Map (optional)<br />
-        <textarea cols="40" rows="8" name="im">{}</textarea>
+        <textarea cols="40" rows="8" id="im">{}</textarea>
       </label>
       <br />
       <br />
       <label>
         Exported Modules (required)<br />
-        <textarea cols="40" rows="8" name="mods">{
+        <textarea cols="40" rows="8" id="mods">{
   "canvasConfetti": "https://cdn.skypack.dev/canvas-confetti"
 }</textarea>
       </label>
       <br />
       <br />
-      <button type="submit" id="btn">
-        Bundle
+      Bundle to <button type="submit" id="btn">
+        script
+      </button> <button type="submit" id="zipbtn">
+        zip
       </button>
       <br />
       <br />
@@ -44,7 +47,7 @@
         readonly
         id="output"
       ></textarea>
-    </form>
+    </div>
     <footer>
       <br />
       <br />

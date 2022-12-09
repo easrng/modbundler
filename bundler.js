@@ -8,12 +8,33 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
-
+import "https://unpkg.com/@rollup/browser@3.7.0/dist/rollup.browser.js";
+const rollup = window.rollup;
+import "https://unpkg.com/terser@5.16.1/lib/transform.js?module";
+import "https://unpkg.com/terser@5.16.1/lib/mozilla-ast.js?module";
+import * as Terser from "https://unpkg.com/terser@5.16.1/lib/minify.js?module";
+window.Terser = Terser;
 export default async function esmBundler(args) {
   let baseUrl;
   const sourceFiles = [];
-  function createBlob(source, type = "text/javascript") {
-    return "mb:" + (sourceFiles.push(source) - 1);
+  const numberToUrl = {};
+  function getFilename(number) {
+    let url = numberToUrl[number];
+    if (url == "https://example.com/entrypoint.js") return "entrypoint.js";
+    return (
+      encodeURIComponent(url)
+        .replace(/\!/g, "%21")
+        .replace(/%(..)/g, "!$1!")
+        .replace(/!!/g, "_") +
+      "." +
+      number +
+      ".js"
+    );
+  }
+  function createBlob(source, type = "text/javascript", moduleUrl) {
+    let num = sourceFiles.push(source) - 1;
+    numberToUrl[num] = moduleUrl;
+    return "mb:" + num;
   }
   const noop = () => {};
   const baseEl = document.querySelector("base[href]");
@@ -167,7 +188,7 @@ export default async function esmBundler(args) {
   function resolveAndComposeImportMap(json, baseUrl, parentMap) {
     const outMap = {
       imports: Object.assign({}, parentMap.imports),
-      scopes: Object.assign({}, parentMap.scopes)
+      scopes: Object.assign({}, parentMap.scopes),
     };
 
     if (json.imports)
@@ -254,8 +275,8 @@ export default async function esmBundler(args) {
   const cssModulesEnabled = enable.includes("css-modules");
   const jsonModulesEnabled = enable.includes("json-modules");
   let err;
-  window.addEventListener("error", _err => (err = _err));
-  let dynamicImport = u => import(u);
+  window.addEventListener("error", (_err) => (err = _err));
+  let dynamicImport = (u) => import(u);
   const supportsDynamicImportCheck = true;
   let supportsJsonAssertions = false;
   let supportsCssAssertions = false;
@@ -272,7 +293,7 @@ export default async function esmBundler(args) {
     if (((t = c), t.length > s || !e)) {
       for (; t.length > s; ) s *= 2;
       (r = new ArrayBuffer(4 * s)),
-        (e = (function(e, r, a) {
+        (e = (function (e, r, a) {
           "use asm";
           var s = new e.Int8Array(a),
             i = new e.Int16Array(a),
@@ -323,11 +344,11 @@ export default async function esmBundler(args) {
                     break;
                   case 101: {
                     if (
-                      (((i[292] | 0) == 0
-                      ? T(a) | 0
-                      : 0)
-                      ? B((e + 4) | 0, 120, 112, 111, 114, 116) | 0
-                      : 0)
+                      (
+                        ((i[292] | 0) == 0 ? T(a) | 0 : 0)
+                          ? B((e + 4) | 0, 120, 112, 111, 114, 116) | 0
+                          : 0
+                      )
                         ? (b(), (s[589] | 0) == 0)
                         : 0
                     ) {
@@ -411,9 +432,7 @@ export default async function esmBundler(args) {
                         break;
                       case 101: {
                         if (
-                          ((i[292] | 0) == 0
-                          ? T(r) | 0
-                          : 0)
+                          ((i[292] | 0) == 0 ? T(r) | 0 : 0)
                             ? B((e + 4) | 0, 120, 112, 111, 114, 116) | 0
                             : 0
                         ) {
@@ -435,9 +454,7 @@ export default async function esmBundler(args) {
                       }
                       case 99: {
                         if (
-                          (T(r) | 0
-                          ? D((e + 4) | 0, 108, 97, 115, 115) | 0
-                          : 0)
+                          (T(r) | 0 ? D((e + 4) | 0, 108, 97, 115, 115) | 0 : 0)
                             ? _(i[(e + 12) >> 1] | 0) | 0
                             : 0
                         ) {
@@ -944,9 +961,11 @@ export default async function esmBundler(args) {
                 case 46: {
                   t[18] = (t[18] | 0) + 2;
                   if (
-                    (((w(1) | 0) << 16) >> 16 == 109
-                    ? ((e = t[18] | 0), L((e + 2) | 0, 101, 116, 97) | 0)
-                    : 0)
+                    (
+                      ((w(1) | 0) << 16) >> 16 == 109
+                        ? ((e = t[18] | 0), L((e + 2) | 0, 101, 116, 97) | 0)
+                        : 0
+                    )
                       ? (i[t[15] >> 1] | 0) != 46
                       : 0
                   )
@@ -1474,15 +1493,23 @@ export default async function esmBundler(args) {
             f = f | 0;
             n = n | 0;
             if (
-              (((((i[(e + 12) >> 1] | 0) == (n << 16) >> 16
-              ? (i[(e + 10) >> 1] | 0) == (f << 16) >> 16
-              : 0)
-              ? (i[(e + 8) >> 1] | 0) == (c << 16) >> 16
-              : 0)
-              ? (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
-              : 0)
-              ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
-              : 0)
+              (
+                (
+                  (
+                    (
+                      (i[(e + 12) >> 1] | 0) == (n << 16) >> 16
+                        ? (i[(e + 10) >> 1] | 0) == (f << 16) >> 16
+                        : 0
+                    )
+                      ? (i[(e + 8) >> 1] | 0) == (c << 16) >> 16
+                      : 0
+                  )
+                    ? (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
+                    : 0
+                )
+                  ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
+                  : 0
+              )
                 ? (i[(e + 2) >> 1] | 0) == (a << 16) >> 16
                 : 0
             )
@@ -1591,13 +1618,19 @@ export default async function esmBundler(args) {
             c = c | 0;
             f = f | 0;
             if (
-              ((((i[(e + 10) >> 1] | 0) == (f << 16) >> 16
-              ? (i[(e + 8) >> 1] | 0) == (c << 16) >> 16
-              : 0)
-              ? (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
-              : 0)
-              ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
-              : 0)
+              (
+                (
+                  (
+                    (i[(e + 10) >> 1] | 0) == (f << 16) >> 16
+                      ? (i[(e + 8) >> 1] | 0) == (c << 16) >> 16
+                      : 0
+                  )
+                    ? (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
+                    : 0
+                )
+                  ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
+                  : 0
+              )
                 ? (i[(e + 2) >> 1] | 0) == (a << 16) >> 16
                 : 0
             )
@@ -1776,11 +1809,15 @@ export default async function esmBundler(args) {
             t = t | 0;
             c = c | 0;
             if (
-              (((i[(e + 8) >> 1] | 0) == (c << 16) >> 16
-              ? (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
-              : 0)
-              ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
-              : 0)
+              (
+                (
+                  (i[(e + 8) >> 1] | 0) == (c << 16) >> 16
+                    ? (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
+                    : 0
+                )
+                  ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
+                  : 0
+              )
                 ? (i[(e + 2) >> 1] | 0) == (a << 16) >> 16
                 : 0
             )
@@ -1840,9 +1877,11 @@ export default async function esmBundler(args) {
             s = s | 0;
             t = t | 0;
             if (
-              ((i[(e + 6) >> 1] | 0) == (t << 16) >> 16
-              ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
-              : 0)
+              (
+                (i[(e + 6) >> 1] | 0) == (t << 16) >> 16
+                  ? (i[(e + 4) >> 1] | 0) == (s << 16) >> 16
+                  : 0
+              )
                 ? (i[(e + 2) >> 1] | 0) == (a << 16) >> 16
                 : 0
             )
@@ -2097,7 +2136,7 @@ export default async function esmBundler(args) {
             se: ee,
             ses: ne,
             ss: re,
-            sta: Y
+            sta: Y,
           };
         })(
           {
@@ -2105,7 +2144,7 @@ export default async function esmBundler(args) {
             Int16Array: Int16Array,
             Int32Array: Int32Array,
             Uint8Array: Uint8Array,
-            Uint16Array: Uint16Array
+            Uint16Array: Uint16Array,
           },
           {},
           r
@@ -2118,8 +2157,9 @@ export default async function esmBundler(args) {
     )
       throw Object.assign(
         new Error(
-          `Parse error ${b}:${t.slice(0, e.e()).split("\n").length}:${e.e() -
-            t.lastIndexOf("\n", e.e() - 1)}`
+          `Parse error ${b}:${t.slice(0, e.e()).split("\n").length}:${
+            e.e() - t.lastIndexOf("\n", e.e() - 1)
+          }`
         ),
         { idx: e.e() }
       );
@@ -2177,7 +2217,7 @@ export default async function esmBundler(args) {
       case 120:
         return String.fromCharCode(k(2));
       case 117:
-        return (function() {
+        return (function () {
           let e;
           123 === t.charCodeAt(c$1)
             ? (++c$1,
@@ -2257,7 +2297,7 @@ export default async function esmBundler(args) {
     return {
       r: resolveImportMap(importMap, urlResolved || id, parentUrl),
       // b = bare specifier
-      b: !urlResolved && !isURL(id)
+      b: !urlResolved && !isURL(id),
     };
   }
 
@@ -2270,8 +2310,8 @@ export default async function esmBundler(args) {
     if (load.b || seen[load.u]) return;
     seen[load.u] = 1;
     await load.L;
-    await Promise.all(load.d.map(dep => loadAll(dep, seen)));
-    if (!load.n) load.n = load.d.some(dep => dep.n);
+    await Promise.all(load.d.map((dep) => loadAll(dep, seen)));
+    if (!load.n) load.n = load.d.some((dep) => dep.n);
   }
 
   let importMap = { imports: {}, scopes: {} };
@@ -2352,6 +2392,13 @@ export default async function esmBundler(args) {
     const source = load.S;
 
     let resolvedSource = [];
+    {
+      const realPush = resolvedSource.push;
+      resolvedSource.push = function (ele) {
+        if (typeof ele == "object" && Number.isNaN(ele.m)) debugger;
+        return realPush.call(this, ele);
+      };
+    }
 
     if (!imports.length) {
       resolvedSource.push(source);
@@ -2369,19 +2416,23 @@ export default async function esmBundler(args) {
             // circular shell creation
             if (!(blobUrl = depLoad.s)) {
               blobUrl = depLoad.s = createBlob(
-                [`export function u$_(m){${depLoad.a[1]
-                  .map(name =>
-                    name === "default"
-                      ? `$_default=m.default`
-                      : `${name}=m.${name}`
-                  )
-                  .join(",")}}${depLoad.a[1]
-                  .map(name =>
-                    name === "default"
-                      ? `let $_default;export{$_default as default}`
-                      : `export let ${name}`
-                  )
-                  .join(";")}\n//# sourceURL=${depLoad.r}?cycle`]
+                [
+                  `export function u$_(m){${depLoad.a[1]
+                    .map((name) =>
+                      name === "default"
+                        ? `$_default=m.default`
+                        : `${name}=m.${name}`
+                    )
+                    .join(",")}}${depLoad.a[1]
+                    .map((name) =>
+                      name === "default"
+                        ? `let $_default;export{$_default as default}`
+                        : `export let ${name}`
+                    )
+                    .join(";")}\n//# sourceURL=${depLoad.r}?cycle`,
+                ],
+                null,
+                depLoad.r || depLoad.u
               );
             }
           }
@@ -2428,14 +2479,15 @@ export default async function esmBundler(args) {
               dynamicImportIndex + 6
             )}Shim(${source.slice(start, end)}, `
           );
-          if(load.r) resolvedSource.push({ m: urlNumber(load.r) });
+          resolvedSource.push(JSON.stringify(load.r));
+          //if(load.r) resolvedSource.push({ m: urlNumber(load.r) });
           lastIndex = end;
         }
       }
 
       resolvedSource.push(source.slice(lastIndex));
     }
-    load.b = lastLoad = createBlob(resolvedSource);
+    load.b = lastLoad = createBlob(resolvedSource, null, load.r || load.u);
     load.S = undefined;
   }
 
@@ -2444,13 +2496,14 @@ export default async function esmBundler(args) {
   const cssContentType = /^(text|application)\/css(;|$)/;
   const wasmContentType = /^application\/wasm(;|$)/;
 
-  const cssUrlRegEx = /url\(\s*(?:(["'])((?:\\.|[^\n\\"'])+)\1|((?:\\.|[^\s,"'()\\])+))\s*\)/g;
+  const cssUrlRegEx =
+    /url\(\s*(?:(["'])((?:\\.|[^\n\\"'])+)\1|((?:\\.|[^\s,"'()\\])+))\s*\)/g;
 
   // restrict in-flight fetches to a pool of 100
   let p = [];
   let c = 0;
   function pushFetchPool() {
-    if (++c > 100) return new Promise(r => p.push(r));
+    if (++c > 100) return new Promise((r) => p.push(r));
   }
   function popFetchPool() {
     c--;
@@ -2481,7 +2534,7 @@ export default async function esmBundler(args) {
               `url(${quotes}${resolveUrl(relUrl1 || relUrl2, url)}${quotes})`
           )
         )});export default s;`,
-        t: "css"
+        t: "css",
       };
     else if (wasmContentType.test(contentType))
       throw new Error("WASM modules not yet supported");
@@ -2514,7 +2567,7 @@ export default async function esmBundler(args) {
       // needsShim
       n: false,
       // type
-      t: null
+      t: null,
     };
 
     load.f = (async () => {
@@ -2549,26 +2602,28 @@ export default async function esmBundler(args) {
 
     load.L = load.f.then(async () => {
       let childFetchOpts = fetchOpts;
-      load.d = (await Promise.all(
-        load.a[0].map(async ({ n, d }) => {
-          if (
-            (d >= 0 && !supportsDynamicImport) ||
-            (d === 2 && !supportsImportMeta)
-          )
-            load.n = true;
-          if (!n) return;
-          const { r, b } = await resolve(n, load.r || load.u);
-          if (b && (!supportsImportMaps || importMapSrcOrLazy)) load.n = true;
-          if (d !== -1) return;
-          if (!r) throwUnresolved(n, load.r || load.u);
-          if (skip && skip.test(r)) return { b: r };
-          if (childFetchOpts.integrity)
-            childFetchOpts = Object.assign({}, childFetchOpts, {
-              integrity: undefined
-            });
-          return getOrCreateLoad(r, childFetchOpts).f;
-        })
-      )).filter(l => l);
+      load.d = (
+        await Promise.all(
+          load.a[0].map(async ({ n, d }) => {
+            if (
+              (d >= 0 && !supportsDynamicImport) ||
+              (d === 2 && !supportsImportMeta)
+            )
+              load.n = true;
+            if (!n) return;
+            const { r, b } = await resolve(n, load.r || load.u);
+            if (b && (!supportsImportMaps || importMapSrcOrLazy)) load.n = true;
+            if (d !== -1) return;
+            if (!r) throwUnresolved(n, load.r || load.u);
+            if (skip && skip.test(r)) return { b: r };
+            if (childFetchOpts.integrity)
+              childFetchOpts = Object.assign({}, childFetchOpts, {
+                integrity: undefined,
+              });
+            return getOrCreateLoad(r, childFetchOpts).f;
+          })
+        )
+      ).filter((l) => l);
     });
 
     return load;
@@ -2582,14 +2637,17 @@ export default async function esmBundler(args) {
   }
 
   function processScript(source) {
-    return topLevelLoad(`${baseUrl}?${id++}`, {}, source, !shimMode).catch(
-      e => {
-        setTimeout(() => {
-          throw e;
-        });
-        onerror(e);
-      }
-    );
+    return topLevelLoad(
+      `https://example.com/entrypoint.js`,
+      {},
+      source,
+      !shimMode
+    ).catch((e) => {
+      setTimeout(() => {
+        throw e;
+      });
+      onerror(e);
+    });
   }
 
   function throwUnresolved(id, parentUrl) {
@@ -2601,10 +2659,7 @@ export default async function esmBundler(args) {
   }
   let mod = await processScript(
     args.modules
-      .map(
-        m =>
-          `export * as ${m.name} from ${JSON.stringify(m.url)};`
-      )
+      .map((m) => `export * as ${m.name} from ${JSON.stringify(m.url)};`)
       .join("")
   );
   function getDeps(mod, s) {
@@ -2618,6 +2673,95 @@ export default async function esmBundler(args) {
     if (a) return Array.from(s);
   }
   const files = {};
-  for (let m of getDeps(mod)) files[m] = sourceFiles[m];
-  return `let c=${JSON.stringify(files)},f=${JSON.stringify(urlNumber(mod.b))},u=(c,f)=>URL.createObjectURL(new Blob(c[f].map(e=>typeof e=="object"?JSON.stringify(u(c,e.m)):e),{type:"text/javascript"})),m=await import(u(c,f));`+args.modules.map(e=>`export const ${e.name}=m[${JSON.stringify(e.name)}]`).join(";")
+  let zip;
+  if (args.zip) {
+    zip = new window.JSZip();
+  }
+  for (let m of getDeps(mod)) {
+    if (args.zip) {
+      zip.file(
+        getFilename(m),
+        sourceFiles[m]
+          .map((e) =>
+            typeof e == "object" ? JSON.stringify("./" + getFilename(e.m)) : e
+          )
+          .join("")
+      );
+    } else {
+      files[m] = sourceFiles[m];
+    }
+  }
+  if (args.zip) {
+    return URL.createObjectURL(await zip.generateAsync({ type: "blob" }));
+  } else {
+    const bundle = await rollup.rollup({
+      plugins: [
+        {
+          load(id) {
+            return {
+              code: files[urlNumber(id)]
+                .map((e) =>
+                  typeof e == "object" ? JSON.stringify("mb:" + e.m) : e
+                )
+                .join(""),
+            };
+          },
+          resolveId(id) {
+            return id;
+          },
+        },
+      ],
+      input: [mod.b],
+      onwarn: console.warn,
+    });
+    const bundled = (await bundle.generate({ format: "es" })).output[0].code;
+    const parseOptions = {};
+    let toplevel
+    Object.defineProperty(parseOptions, "toplevel", {
+      get(){
+        return toplevel
+      },
+      set(v){
+      toplevel=v
+        if(toplevel != null) {
+          function walk(node, cb, to_visit = [node]) {
+            const push = to_visit.push.bind(to_visit);
+            while (to_visit.length) {
+              const node = to_visit.pop();
+              const ret = cb(node, to_visit);
+
+              if (ret) {
+                if (ret + "" === "Symbol(abort walk)") return true;
+                continue;
+              }
+
+              node._children_backwards(push);
+            }
+            return false;
+          }
+          console.log("modifying toplevel", toplevel);
+          walk(toplevel, (node) => {
+            if(node.template_string && node.prefix.name.includes("html")) {
+              for(let seg of node.template_string.segments) {
+                if(seg.TYPE=="TemplateSegment") {
+                  console.log(seg.raw)
+                  seg.raw=seg.raw.replace(/\s+/g," ")
+                  console.log(seg.raw)
+                }
+              }
+            }
+          });
+        }
+    }
+    })
+    const minified = (await Terser.minify({code:bundled},{
+  module: true,
+  compress: {},
+  mangle: {},
+  output: {},
+  parse: parseOptions,
+  rename: {},
+})).code
+    return minified
+  }
 }
