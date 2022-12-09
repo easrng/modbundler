@@ -1,24 +1,26 @@
 import esmBundler from "./bundler.js";
-stats.beacon("page-load")
-document.forms[0].addEventListener("submit", async e => {
-  e.preventDefault();
-  window.output.textContent = "Bundling...";
-  window.btn.disabled = true;
-  stats.beacon("bundle-start")
+window.stats.beacon("page-load")
+async function bundle(zip) {
+  window.output.textContent = "Bundling to "+(zip?"zip":"script")+"...";
+  window.btn.disabled = window.zipbtn.disabled = true;
+  window.stats.beacon("bundle-start")
   try {
     window.output.textContent = await esmBundler({
-      modules: Object.entries(JSON.parse(document.forms[0].mods.value)).map(
+      modules: Object.entries(JSON.parse(window.mods.value)).map(
         ([name, url]) => ({ name, url })
       ),
-      importMap: JSON.parse(document.forms[0].im.value)
+      importMap: JSON.parse(window.im.value),
+      zip
     });
-    window.btn.disabled = false;
-    stats.beacon("bundle-finish")
+    window.btn.disabled = window.zipbtn.disabled = false;
+    window.stats.beacon("bundle-finish")
   } catch (e) {
     console.error(e);
-    window.btn.disabled = false;
+    window.btn.disabled = window.zipbtn.disabled = false;
     window.output.textContent =
       "Error bundling. Make sure the modules are served with CORS headers.";
-    stats.beacon("bundle-error")
+    window.stats.beacon("bundle-error")
   }
-});
+}
+window.zipbtn.addEventListener("click", () => bundle(true));
+window.btn.addEventListener("click", () => bundle(false));
