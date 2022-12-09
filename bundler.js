@@ -2662,14 +2662,17 @@ export default async function esmBundler(args) {
       .map((m) => `export * as ${m.name} from ${JSON.stringify(m.url)};`)
       .join("")
   );
-  function getDeps(mod, s) {
+  function getDeps(num, s) {
     let a;
     if (!s) {
       s = new Set();
       a = true;
+      num = urlNumber(num.b);
     }
-    s.add(urlNumber(mod.b));
-    for (let m of mod.d) getDeps(m, s);
+    s.add(num);
+    for (let dnum of new Set(sourceFiles[num].filter(e=>typeof e == "object").map(e=>e.m))) {
+      if(!s.has(dnum)) getDeps(dnum, s);
+    }
     if (a) return Array.from(s);
   }
   const files = {};
