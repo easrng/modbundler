@@ -121,7 +121,7 @@ function Form({ toastsRef }) {
     setBundling(true);
     try {
       const output = await bundle(
-        codeRef.current.value,
+        codeRef.current.value || codeRef.current.placeholder,
         minifyRef.current.checked
       );
       const url = URL.createObjectURL(
@@ -225,7 +225,6 @@ function Form({ toastsRef }) {
         class="form-control input-block flex-1"
         type="text"
         placeholder=${'import { render, h } from "https://esm.sh/preact@10";\nimport htm from "https://esm.sh/htm@3";\nimport confetti from "https://esm.sh/canvas-confetti@1";\nconst html = htm.bind(h);\nfunction App() {\n  return html`<button onClick=${() => confetti()}>🎉</button>`;\n}\n\nrender(html`<${App} />`, document.body);\n'}
-        required
         ref=${codeRef}
         disabled=${bundling}
       />
