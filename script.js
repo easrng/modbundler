@@ -15,7 +15,7 @@ const asyncLibs = Promise.all([
     e.default,
   ]),
 ]).then((e) => Object.fromEntries(e));
-import minifyHtm from "./minifyhtm.js"
+import minifyHtm from "./minifyhtm.js";
 const html = htm.bind(h);
 async function bundle(code, shouldMinify) {
   const bundle = await (
@@ -34,8 +34,8 @@ async function bundle(code, shouldMinify) {
           return new URL(a, b).href;
         },
         resolveDynamicImport() {
-          return false
-        }
+          return false;
+        },
       },
     ],
     input: ["input:"],
@@ -75,11 +75,17 @@ async function bundle(code, shouldMinify) {
                 node.prefix.name &&
                 node.prefix.name === "html"
               ) {
-                const segs = node.template_string.segments.filter(seg=>seg.TYPE === "TemplateSegment")
-                const fields = node.template_string.segments.filter(seg=>seg.TYPE !== "TemplateSegment").map(e=>({"__field":e}))
-                const statics = minifyHtm(segs.map(e=>e.value))
-                for(const [i, seg] of segs.entries()) {
-                  seg.raw = JSON.stringify(statics[i]).slice(1,-1).replace(/\${/,"\\${")
+                const segs = node.template_string.segments.filter(
+                  (seg) => seg.TYPE === "TemplateSegment"
+                );
+                const fields = node.template_string.segments
+                  .filter((seg) => seg.TYPE !== "TemplateSegment")
+                  .map((e) => ({ __field: e }));
+                const statics = minifyHtm(segs.map((e) => e.value));
+                for (const [i, seg] of segs.entries()) {
+                  seg.raw = JSON.stringify(statics[i])
+                    .slice(1, -1)
+                    .replace(/\${/, "\\${");
                 }
               }
             }
@@ -119,7 +125,7 @@ function Form({ toastsRef }) {
         minifyRef.current.checked
       );
       const url = URL.createObjectURL(
-        new Blob([output], { type: "text/javascript" })
+        new Blob([output], { type: "text/javascript;charset=utf-8" })
       );
       toastsRef.current(html`<div class="Toast Toast--success">
         <span class="Toast-icon">
@@ -206,17 +212,19 @@ function Form({ toastsRef }) {
       onSubmit=${bundling ? noop : onSubmit}
       class="width-full height-full d-flex flex-column p-2"
     >
-      <h1 class="mb-2">
+      <h1>
         ${"ModBundler "}
         <a href="https://easrng.net" class="color-fg-muted text-light">
           by easrng
         </a>
       </h1>
+      <p class="mb-2 color-fg-muted">
+        A simple ES module bundler. Paste a module, get a bundle.
+      </p>
       <textarea
         class="form-control input-block flex-1"
         type="text"
-        placeholder="// code goes here"
-        aria-label="code goes here"
+        placeholder=${'import { render, h } from "https://esm.sh/preact@10";\nimport htm from "https://esm.sh/htm@3";\nimport confetti from "https://esm.sh/canvas-confetti@1";\nconst html = htm.bind(h);\nfunction App() {\n  return html`<button onClick=${() => confetti()}>🎉</button>`;\n}\n\nrender(html`<${App} />`, document.body);\n'}
         required
         ref=${codeRef}
         disabled=${bundling}

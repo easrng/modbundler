@@ -14,15 +14,6 @@ export default function (statics) {
   let char, propName, tagOpen, closingTag, quoteWith;
 
   const commit = (field) => {
-    const modeStr = {
-      0: "MODE_SLASH",
-      1: "MODE_TEXT",
-      2: "MODE_WHITESPACE",
-      3: "MODE_TAGNAME",
-      4: "MODE_COMMENT",
-      5: "MODE_PROP_SET",
-      6: "MODE_PROP_APPEND",
-    }[mode];
     if (mode === MODE_TEXT) {
       if (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, ""))) {
         minified.push("");
@@ -54,8 +45,6 @@ export default function (statics) {
     } else if (field && mode === MODE_COMMENT) {
       minified.push("");
       minified.push(field ? {} : buffer);
-    } else {
-      console.log("unhandled", modeStr);
     }
 
     if (closingTag || mode === MODE_SLASH) {
@@ -175,4 +164,4 @@ export default function (statics) {
     throw new Error("the lengths of statics and newStatics are mismatched");
   }
   return newStatics;
-};
+}
